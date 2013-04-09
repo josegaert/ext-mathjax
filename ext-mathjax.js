@@ -1,7 +1,7 @@
 /*
  * ext-mathjax.js
  *
- * Licensed under the GPL License
+ * Licensed under the Apache License
  *
  * Copyright(c) 2013 Jo Segaert
  *
@@ -9,12 +9,12 @@
 
 svgEditor.addExtension("mathjax", function() {
   // Configuration of the MathJax extention.
-  
-      // This will be added to the head tag before MathJax is loaded.
+
+  // This will be added to the head tag before MathJax is loaded.
   var mathjaxConfiguration = '<script type="text/x-mathjax-config">\
         MathJax.Hub.Config({\
           extensions: ["tex2jax.js"],\
-  		    jax: ["input/TeX","output/SVG"],\
+			    jax: ["input/TeX","output/SVG"],\
           showProcessingMessages: true,\
           showMathMenu: false,\
           showMathMenuMSIE: false,\
@@ -112,57 +112,6 @@ svgEditor.addExtension("mathjax", function() {
     );
   }
 
-  function hideMathEditor() {
-    $('#mathjax').hide();
-  }
-
-  function showMathEditor() {
-    var mathjax = $('#mathjax');
-    // Create the MathEditor when it is wanted the first time.
-    if (!mathjax.length) {
-      $('<div id="mathjax">\
-          <!-- Here is where MathJax creates the math -->\
-          <div id="mathjax_creator" class="tex2jax_process" style="display:none">\
-            $${}$$\
-          </div>\
-					<div id="mathjax_overlay"></div>\
-					<div id="mathjax_container">\
-						<div id="tool_mathjax_back" class="toolbar_button">\
-							<button id="tool_mathjax_save">OK</button>\
-							<button id="tool_mathjax_cancel">Cancel</button>\
-						</div>\
-						<fieldset>\
-							<legend id="mathjax_legend">Mathematics Editor</legend>\
-              <label>\
-                <span id="mathjax_explication">Please type your mathematics in \
-                <a href="http://en.wikipedia.org/wiki/Help:Displaying_a_formula" target="_blank">TeX</a> code.</span></label>\
-							<textarea id="mathjax_code_textarea" spellcheck="false"></textarea>\
-						</fieldset>\
-					</div>\
-				</div>'
-        ).insertAfter('#svg_prefs');
-
-      // Make the MathEditor draggable.
-      $('#mathjax_container').draggable({cancel: 'button,fieldset', containment: 'window'});
-
-      // Add functionality and picture to cancel button.
-      $('#tool_mathjax_cancel').prepend($.getSvgIcon('cancel', true))
-        .on("click touched", function() {
-        hideMathEditor();
-      });
-
-      // Add functionality and picture to the save button.
-      $('#tool_mathjax_save').prepend($.getSvgIcon('ok', true))
-        .on("click touched", function() {
-        saveMath();
-        hideMathEditor();
-      });
-
-    } else {
-      $('#mathjax').show();
-    }
-  }
-
   return {
     name: "MatJax",
     svgicons: "extensions/mathjax-icons.xml",
@@ -176,6 +125,44 @@ svgEditor.addExtension("mathjax", function() {
             // From this point on it is very probable that it will be needed, so load it.
             if (mathjaxLoaded === false) {
 
+              $('<div id="mathjax">\
+                <!-- Here is where MathJax creates the math -->\
+                  <div id="mathjax_creator" class="tex2jax_process" style="display:none">\
+                    $${}$$\
+                  </div>\
+                  <div id="mathjax_overlay"></div>\
+                  <div id="mathjax_container">\
+                    <div id="tool_mathjax_back" class="toolbar_button">\
+                      <button id="tool_mathjax_save">OK</button>\
+                      <button id="tool_mathjax_cancel">Cancel</button>\
+                    </div>\
+                    <fieldset>\
+                      <legend id="mathjax_legend">Mathematics Editor</legend>\
+                      <label>\
+                        <span id="mathjax_explication">Please type your mathematics in \
+                        <a href="http://en.wikipedia.org/wiki/Help:Displaying_a_formula" target="_blank">TeX</a> code.</span></label>\
+                      <textarea id="mathjax_code_textarea" spellcheck="false"></textarea>\
+                    </fieldset>\
+                  </div>\
+                </div>'
+                ).insertAfter('#svg_prefs').hide();
+
+              // Make the MathEditor draggable.
+              $('#mathjax_container').draggable({cancel: 'button,fieldset', containment: 'window'});
+
+              // Add functionality and picture to cancel button.
+              $('#tool_mathjax_cancel').prepend($.getSvgIcon('cancel', true))
+                .on("click touched", function() {
+                $('#mathjax').hide();
+              });
+
+              // Add functionality and picture to the save button.
+              $('#tool_mathjax_save').prepend($.getSvgIcon('ok', true))
+                .on("click touched", function() {
+                saveMath();
+                $('#mathjax').hide();
+              });
+
               // MathJax preprocessing has to ignore most of the page.
               $('body').addClass('tex2jax_ignore');
 
@@ -186,6 +173,7 @@ svgEditor.addExtension("mathjax", function() {
                 // When MathJax is loaded get the div where the math will be rendered.
                 MathJax.Hub.queue.Push(function() {
                   math = MathJax.Hub.getAllJax('#mathjax_creator')[0];
+                  console.log(math);
                   mathjaxLoaded = true;
                   console.log('MathJax Loaded');
                 });
@@ -208,7 +196,6 @@ svgEditor.addExtension("mathjax", function() {
         return {started: true};
       }
     },
-      
     mouseUp: function(opts) {
       if (svgCanvas.getMode() === "mathjax") {
         // Get the coordinates from your mouse.
@@ -217,11 +204,10 @@ svgEditor.addExtension("mathjax", function() {
         locationX = opts.mouse_x / zoom;
         locationY = opts.mouse_y / zoom;
 
-        showMathEditor();
+        $('#mathjax').show();
         return {started: false}; // Otherwise the last selected object dissapears.
       }
     },
-      
     callback: function() {
       $('<style>').text('\
 				#mathjax fieldset{\
